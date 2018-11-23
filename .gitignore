@@ -1,0 +1,22 @@
+*.class
+*.log
+/.idea
+/project/target
+/target
+.DS_Store
+
+
+# Ignore Play! working directory #
+bin/
+/db
+.eclipse
+/lib/
+/logs/
+/modules
+/project/project
+tmp/
+test-result
+server.pid
+*.eml
+/dist/
+.cache
