@@ -1,8 +1,7 @@
 *.class
 *.log
 /.idea
-/project/target
-/target
+*/target
 .DS_Store
 
 
