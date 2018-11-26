@@ -1,7 +1,7 @@
 package scrabble
 
 case class Tile(letter: Char) {
-  // lowercase?
+  // TODO convert to lowercase? Where should this validation occur?
   def value: Int = {
     letter match {
       case 'A'|'E'|'I'|'O'|'U'|'N'|'R'|'T'|'L'|'S' => 1
