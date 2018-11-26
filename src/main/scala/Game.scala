@@ -1,20 +1,57 @@
 package scrabble
+import scala.io.Source
 
 object Game extends App {
   //Letters should be distributed based on the English Scrabble letter distribution (you may ignore blank tiles).
   var letterBag: List[Tile] = Bag.initialise()
-  var player = Player(draw(7), Nil)
+  var player = Player(Nil, Nil)
 
   // Assign seven tiles chosen randomly from the english alphabet to a rack.
+  // TODO test
   // TODO need to use Option[Tile] & bag.headOption to handle empty Bag
+  // TODO how to handle letterBag var here? Scoping?
   def drawTile(bag: List[Tile]): Tile = {
-    bag.head
+    val tile = bag.head // TODO use option
+    letterBag = bag.tail
+    tile
   }
 
-  def draw(size: Int): List[Tile] = {
-    val rack = List.fill(size)(drawTile(letterBag))
-    letterBag = letterBag.takeRight(letterBag.length - size)
-    rack
+  // TODO test
+  def draw(player: Player, number: Int): Player = {
+    // TODO player scoping?
+    // check if play has rack/Nil??
+    if (player.rack == Nil) {
+      // if no, draw 7 & return new Player with rack of 7
+      val newRack = List.fill(7)(drawTile(letterBag))
+      letterBag = letterBag.takeRight(letterBag.length - 7) // TODO redundant if drawTile() handles
+      Player(newRack, player.wordsPlayed)
+    } else {
+      // if yes draw difference to 7, return play with rack of 7
+      val refilledRack = player.rack ++ List.fill(number)(drawTile(letterBag))
+      letterBag = letterBag.takeRight(letterBag.length - number) // TODO redundant if drawTile() handles
+      Player(refilledRack, player.wordsPlayed)
+    }
+  }
+
+  def playWord(player: Player): Player  = {
+    //Find a valid word formed from the seven tiles. A list of valid words can be found in twl06.txt.
+    val validDictionary: List[String] = Source.fromFile("src/main/data/validWords.txt").getLines.toList
+//    var word = 0;
+//    for (word <- 0 to 10) {
+//      println(validDictionary(word))
+//    }
+    player
+  }
+
+  def playerTurn(player: Player): Unit = {
+    // compose playWord and draw?
+    //plays word
+    //draws to refill rack based on word length
+  }
+
+  def gameStart(): Unit = {
+    player = Player(Nil, Nil) // reinitialize player with empty rack and word list
+    draw(player, 7) // draw new rack
   }
 
   // Calculate the score for a word (you may ignore double/triple letter/word scores).
@@ -22,19 +59,8 @@ object Game extends App {
     word.toList.map(Tile(_).value).sum
   }
 
-  def playerTurn(player: Player): Unit = {
-    //plays word
-    //refills tiles
-  }
 
-  def playWord(player: Player): Unit  = {
-  //Find a valid word formed from the seven tiles. A list of valid words can be found in twl06.txt.
-  }
-
-  def drawTiles(player: Player, num: Int): Player = {
-     val refilledRack = player.rack ++ draw(num)
-     Player(refilledRack, player.wordsPlayed)
-  }
+ playWord(player);
 
 
 }
