@@ -4,6 +4,7 @@
 */target
 /target
 .DS_Store
+playground.sc
 
 
 # Ignore Play! working directory #
