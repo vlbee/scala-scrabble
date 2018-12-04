@@ -1,8 +1,10 @@
 package scrabble
+
 import scala.util.Random
 
 object Bag {
-  var letterDistribution: Map[Char,Int] = Map(
+
+  var letterDistribution: Map[Char, Int] = Map(
     'A' -> 9,
     'B' -> 2,
     'C' -> 2,
@@ -32,7 +34,7 @@ object Bag {
   )
 
   def initialise(): List[Tile] = {
-    def dupeLetters(letter:(Char, Int)): List[Tile] = List.fill(letter._2)(Tile(letter._1))
+    def dupeLetters(letter: (Char, Int)): List[Tile] = List.fill(letter._2)(Tile(letter._1))
     Random.shuffle(letterDistribution.toList.flatMap(dupeLetters))
   }
 

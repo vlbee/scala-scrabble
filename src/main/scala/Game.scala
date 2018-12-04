@@ -1,31 +1,42 @@
 package scrabble
 
+import scala.util.Random
+
 object Game extends App {
 
   // UTILITIES //
 
-  // Assign seven tiles chosen randomly from the english alphabet to a rack.
-  // TODO use option to handle empty bag
-  def drawTile(bag: List[Tile]): Tile = {
-    val tile = bag.head
-    letterBag = bag.tail
-    tile
+  def drawTile(bag: List[Tile]): Option[Tile] = {
+    val tile = bag.headOption
+    tile match {
+      case Some(Tile(_)) => {
+        letterBag = bag.tail
+        tile
+      }
+      case None => None
+    }
   }
 
-  // Refill player rack after playing a word
+  // TODO better way to use Option here?
   def fillRack(rack: List[Tile]): List[Tile] = {
-    if (rack == Nil) List.fill(7)(drawTile(letterBag))
-    else rack ++ List.fill(7 - rack.length)(drawTile(letterBag))
+    val filledRack = {
+      if (rack == Nil) List.fill(7)(drawTile(letterBag)).flatten
+      else rack ++ List.fill(7 - rack.length)(drawTile(letterBag)).flatten
+    }
+    if (filledRack.length < 7) {
+      println("The letter bag is empty")
+    }
+    filledRack
   }
 
-  // TODO test
   def removeTilesFromRack(word: String, rack: List[Tile]): List[Tile] = {
     val wordTiles: List[Tile] = word.toList.map(c => Tile(c))
     rack diff wordTiles
   }
 
-  def displayRack(player: Player): Unit = {
+  def displayRack(player: Player, start: Boolean): Unit = {
     val rack = player.rack
+    if (!start) println(player.name + " has drawn:")
     print("Rack tiles:   ")
     rack.map(tile => {
       print(tile.letter + " ")
@@ -38,13 +49,16 @@ object Game extends App {
     println()
   }
 
-  def promptWord(player: Player): String = {
+  def promptWord(): String = {
     println("Play a word:")
-    val input = scala.io.StdIn.readLine()
-    input.toUpperCase
+    scala.io.StdIn.readLine().toUpperCase
   }
 
-  // Calculate the score for a word (you may ignore double/triple letter/word scores).
+  def promptName(): String = {
+    println("What is your name?")
+    scala.io.StdIn.readLine().toLowerCase.capitalize
+  }
+
   def calculateWordScore(word: String): Int = {
     word.toList.map(Tile(_).value).sum
   }
@@ -53,66 +67,92 @@ object Game extends App {
     if (Dictionary.all.contains(word.toLowerCase())) true else false
   }
 
+  // TODO fix "AA" edge case?
   def isInRack(word: String, rack: List[Tile]): Boolean = {
     val sortedWord = word.toList.sortWith(_.compareTo(_) < 0)
     val sortedRack = rack.map(_.letter).sortWith(_.compareTo(_) < 0)
+    //    println(sortedWord)
+    //    println(sortedRack)
 
-    def loop(wL: List[Char], wI: Int, rL: List[Char], rI: Int ): Boolean  = {
-      if (wI + 1 == sortedWord.length) true
+    def loop(wL: List[Char], wI: Int, rL: List[Char], rI: Int): Boolean = {
+      //      println(wL(wI), wI, rL(rI), rI)
+      if (wI + 1 == sortedWord.length) true // remove + 1 but then loop fails
       else if (rI + 1 == sortedRack.length) false
       else if (wL(wI) == rL(rI)) loop(wL, wI + 1, rL, rI + 1)
       else if (wL(wI) != rL(rI)) loop(wL, wI, rL, rI + 1)
-      else false
+      else true
     }
 
     loop(sortedWord, 0, sortedRack, 0)
   }
 
   def isValidWord(word: String, rack: List[Tile]): Boolean = {
-    if (isInDictionary(word) && isInRack(word, rack)) true else false
+    isInDictionary(word) && isInRack(word, rack)
+  }
+
+  def playWord(rack: List[Tile]): String = {
+    val possibleWords = Dictionary.all.filter(word => isInRack(word.toUpperCase, rack))
+    println("Possible words: " + possibleWords)
+    Random.shuffle(possibleWords).head.toUpperCase
   }
 
   // INITIALIZE GAME //
-
-  //Letters should be distributed based on the English Scrabble letter distribution (you may ignore blank tiles).
   var letterBag: List[Tile] = Bag.initialise()
-  var player = Player(Nil, Nil, 0)
-  var computer = Player(Nil, Nil, 0)
-
 
   // GAME PLAY //
-  def playerTurn(player: Player): (Player) => Player = {
-    displayRack(player);
-    val word: String = promptWord(player)
-    // forfeit turn and get a new rack
+  def displayScore(player: Player, word: String): Unit = {
+    println("The word score for " + word + " is " + calculateWordScore(word))
+    println(player.name + "'s total score is " + (player.wordsPlayed ++ List(word)).map(calculateWordScore(_)).sum)
+    println()
+    println("---------")
+    println()
+  }
+
+  def computerTurn(player: Player): Player = {
+    val word = playWord(player.rack)
+    println(player.name + " has played: " + word)
+    val playedRack = removeTilesFromRack(word, player.rack)
+    displayScore(player, word)
+    Player(player.name, fillRack(playedRack), player.wordsPlayed ++ List(word))
+  }
+
+  def playerTurn(player: Player): Player = {
+    val word: String = promptWord()
     if (word == "") {
-      playerTurn(Player(fillRack(Nil), player.wordsPlayed, player.score))
+      println("You've forfeited your turn to draw all new tiles for your next turn")
+      Player(player.name, fillRack(Nil), player.wordsPlayed)
     } else if (!isValidWord(word, player.rack)) {
       println(word + " is not a valid word. Try again.")
-      println("---------")
       playerTurn(player)
     } else {
       val playedRack = removeTilesFromRack(word, player.rack)
-      val newScore = player.score + calculateWordScore(word)
-      println()
-      println("The word score for " + word + " is " + calculateWordScore(word))
-      println("Your total score is " + newScore)
-      println("---------")
-      playerTurn(Player(fillRack(playedRack), player.wordsPlayed ++ List(word), newScore))
+      displayScore(player, word)
+      Player(player.name, fillRack(playedRack), player.wordsPlayed ++ List(word))
     }
   }
 
+  def turn(player: Player, nextPlayer: Player, start: Boolean = false): (Player, Player) => Player = {
+    displayRack(player, start);
+    if (player.name == "The Computer") {
+      turn(nextPlayer, computerTurn(player))
+    } else {
+      turn(nextPlayer, playerTurn(player))
+    }
+  }
 
   def gameStart(): Unit = {
     println()
     println("Welcome to Scala Scrabble Practice")
     println()
-    player = Player(fillRack(Nil), Nil, 0) // reinitialize player with empty rack and word list
-    println("This is your starting rack of letters:")
-    playerTurn(player)
+    val name: String = promptName()
+    println("---------")
+    println()
+    println("Hello " + name + ". This is your starting rack of letters:")
+    turn(Player(name, fillRack(Nil), Nil), Player("The Computer", fillRack(Nil), Nil), true)
   }
 
-  gameStart();
+  gameStart()
+
 }
 
 

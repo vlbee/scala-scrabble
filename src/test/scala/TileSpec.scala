@@ -1,4 +1,5 @@
 package scrabble
+
 import org.scalatest._
 
 class TileSpec extends FlatSpec with Matchers {
@@ -9,7 +10,6 @@ class TileSpec extends FlatSpec with Matchers {
     Tile('G').value should be(2)
     Tile('K').value should be(5)
   }
-
 }
 
 
