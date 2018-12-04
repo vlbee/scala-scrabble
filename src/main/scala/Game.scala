@@ -90,10 +90,17 @@ object Game extends App {
     isInDictionary(word) && isInRack(word, rack)
   }
 
-  def playWord(rack: List[Tile]): String = {
+  // TODO Highest scoring word
+  def playWord(rack: List[Tile], level: String): Option[String] = {
     val possibleWords = Dictionary.all.filter(word => isInRack(word.toUpperCase, rack))
-    println("Possible words: " + possibleWords)
-    Random.shuffle(possibleWords).head.toUpperCase
+    if (possibleWords == Nil) {
+      None
+    } else {
+      level match {
+        case "random" => Some(Random.shuffle(possibleWords).head.toUpperCase)
+        case "longest" => Some(possibleWords.sortBy(word => (word.length)).reverse.head.toUpperCase)
+      }
+    }
   }
 
   // INITIALIZE GAME //
@@ -109,17 +116,29 @@ object Game extends App {
   }
 
   def computerTurn(player: Player): Player = {
-    val word = playWord(player.rack)
-    println(player.name + " has played: " + word)
-    val playedRack = removeTilesFromRack(word, player.rack)
-    displayScore(player, word)
-    Player(player.name, fillRack(playedRack), player.wordsPlayed ++ List(word))
+    val word = playWord(player.rack, "longest")
+    word match {
+      case Some(w) => {
+        println(player.name + " has played: " + w)
+        val playedRack = removeTilesFromRack(w, player.rack)
+        displayScore(player, w)
+        Player(player.name, fillRack(playedRack), player.wordsPlayed ++ List(w))
+      }
+      case None => {
+        println("No possible words can be played from tiles.")
+        println("---------")
+        println()
+        Player(player.name, player.rack, player.wordsPlayed)
+      }
+    }
   }
 
   def playerTurn(player: Player): Player = {
     val word: String = promptWord()
     if (word == "") {
-      println("You've forfeited your turn to draw all new tiles for your next turn")
+      println("You've forfeited your turn in order to draw all new tiles for your next turn.")
+      println("---------")
+      println()
       Player(player.name, fillRack(Nil), player.wordsPlayed)
     } else if (!isValidWord(word, player.rack)) {
       println(word + " is not a valid word. Try again.")
@@ -147,7 +166,7 @@ object Game extends App {
     val name: String = promptName()
     println("---------")
     println()
-    println("Hello " + name + ". This is your starting rack of letters:")
+    println("Hello " + name + ".) This is your starting rack of letters:")
     turn(Player(name, fillRack(Nil), Nil), Player("The Computer", fillRack(Nil), Nil), true)
   }
 
