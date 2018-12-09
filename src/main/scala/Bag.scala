@@ -1,4 +1,4 @@
-package scrabble
+//package scrabble
 
 import scala.util.Random
 

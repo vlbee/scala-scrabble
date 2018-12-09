@@ -1,8 +1,14 @@
-package scrabble
+//package scrabble
 
 import scala.util.Random
 
+//game runner
+// wrtie test for game runner
+
+// put all utitlities into game class!!!
+
 object Game extends App {
+
 
   // UTILITIES //
 
@@ -67,20 +73,16 @@ object Game extends App {
     if (Dictionary.all.contains(word.toLowerCase())) true else false
   }
 
-  // TODO fix "AA" edge case?
   def isInRack(word: String, rack: List[Tile]): Boolean = {
     val sortedWord = word.toList.sortWith(_.compareTo(_) < 0)
     val sortedRack = rack.map(_.letter).sortWith(_.compareTo(_) < 0)
-    //    println(sortedWord)
-    //    println(sortedRack)
 
     def loop(wL: List[Char], wI: Int, rL: List[Char], rI: Int): Boolean = {
-      //      println(wL(wI), wI, rL(rI), rI)
-      if (wI + 1 == sortedWord.length) true // remove + 1 but then loop fails
-      else if (rI + 1 == sortedRack.length) false
+      if (wI == sortedWord.length) true
+      else if (rI == sortedRack.length) false
       else if (wL(wI) == rL(rI)) loop(wL, wI + 1, rL, rI + 1)
       else if (wL(wI) != rL(rI)) loop(wL, wI, rL, rI + 1)
-      else true
+      else false
     }
 
     loop(sortedWord, 0, sortedRack, 0)
@@ -150,6 +152,7 @@ object Game extends App {
     }
   }
 
+  // Return GAME ---
   def turn(player: Player, nextPlayer: Player, start: Boolean = false): (Player, Player) => Player = {
     displayRack(player, start);
     if (player.name == "The Computer") {

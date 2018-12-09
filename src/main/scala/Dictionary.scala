@@ -1,7 +1,7 @@
-package scrabble
+//package scrabble
 
 import scala.io.Source
 
 object Dictionary {
-  val all: List[String] = Source.fromFile("src/main/data/dictionary.txt").getLines.toList
+  val all: List[String] = Source.fromFile("src/main/resources/dictionary.txt").getLines.toList
 }

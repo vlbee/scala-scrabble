@@ -1,7 +1,7 @@
-package scrabble
+//package scrabble
 
 import org.scalatest._
-import scrabble.Game.letterBag
+
 
 class GameSpec extends FlatSpec with Matchers {
 

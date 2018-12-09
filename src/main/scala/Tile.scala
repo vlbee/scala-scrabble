@@ -1,4 +1,4 @@
-package scrabble
+//package scrabble
 
 case class Tile(c: Char) {
 
