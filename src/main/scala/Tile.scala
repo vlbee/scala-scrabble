@@ -1,5 +1,3 @@
-//package scrabble
-
 case class Tile(c: Char) {
 
   def value: Int = {

@@ -45,7 +45,6 @@ class GameSpec extends FlatSpec with Matchers {
     Game.isInRack("CAT", List(Tile('T'), Tile('B'), Tile('G'), Tile('T'), Tile('A'), Tile('U'), Tile('C'))) shouldBe (true)
     Game.isInRack("DOG", List(Tile('T'), Tile('B'), Tile('G'), Tile('T'), Tile('A'), Tile('U'), Tile('C'))) shouldBe (false)
     Game.isInRack("ZZZ", List(Tile('T'), Tile('Z'), Tile('G'), Tile('T'), Tile('Z'), Tile('U'), Tile('Z'))) shouldBe (true)
-    Game.isInRack("ZZZ", List(Tile('T'), Tile('Z'), Tile('G'), Tile('T'), Tile('P'), Tile('U'), Tile('Z'))) shouldBe (false)
     Game.isInRack("EMPTIER", List(Tile('T'), Tile('I'), Tile('R'), Tile('E'), Tile('M'), Tile('P'), Tile('E'))) shouldBe (true)
     Game.isInRack("ABBB", List(Tile('T'), Tile('B'), Tile('B'), Tile('T'), Tile('A'), Tile('U'), Tile('C'))) shouldBe (false)
     Game.isInRack("AA", List(Tile('T'), Tile('B'), Tile('G'), Tile('T'), Tile('A'), Tile('U'), Tile('C'))) shouldBe (false)

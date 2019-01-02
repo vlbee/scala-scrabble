@@ -1,5 +1,3 @@
-//package scrabble
-
 import scala.util.Random
 
 object Bag {

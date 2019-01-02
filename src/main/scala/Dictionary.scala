@@ -1,5 +1,3 @@
-//package scrabble
-
 import scala.io.Source
 
 object Dictionary {
