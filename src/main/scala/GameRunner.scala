@@ -23,6 +23,7 @@ object GameRunner extends App {
   }
 
   def computerTurn(game: Game): Unit = {
+    checkGameOver(game)
 
     val computer = game.computer
     val (rack, bag) = fillRack(computer.rack, game.bag)
@@ -97,7 +98,7 @@ object GameRunner extends App {
         print("\u001b[31;1mIt's a TIE. ")
         println(s"\u001b[33;1mMore practice is needed $name.")
       } else if (humanScore > computerScore) {
-        print("\u001b[31;1mYou WIN.")
+        print("\u001b[31;1mYou WIN. ")
         println(s"\u001b[33;1mWell done, $name.")
       } else {
         print("\u001b[31;1mYou LOST to the Computer. ")
