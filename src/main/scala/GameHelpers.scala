@@ -2,27 +2,9 @@ import scala.util.Random
 
 object GameHelpers {
 
-  // TODO better way to use Option here?
-  def fillRack(bag: List[Tile], rack: List[Tile]): (List[Tile], List[Tile]) = {
-    var letterBag = bag // variable!!!!
-
-    def drawTile(bag: List[Tile]): Option[Tile] = {
-      val tile = bag.headOption
-      tile match {
-        case Some(Tile(_)) => {
-          letterBag = bag.tail
-          tile
-        }
-        case None => {
-          None
-        }
-      }
-    }
-
-    val filledRack = {
-      if (rack == Nil) List.fill(7)(drawTile(letterBag)).flatten
-      else rack ++ List.fill(7 - rack.length)(drawTile(letterBag)).flatten
-    }
+  def fillRack(rack: List[Tile], letterBag: List[Tile]): (List[Tile], List[Tile]) = {
+    val (drawnTiles, newBag) = letterBag.splitAt(7 - rack.length)
+    val filledRack = rack ++ drawnTiles
 
     if (filledRack.length < 7) {
       println("\u001b[0m---------")
@@ -31,7 +13,7 @@ object GameHelpers {
       print("\u001b[0m")
     }
 
-    (letterBag, filledRack)
+    (filledRack, newBag)
   }
 
   def removeTilesFromRack(word: String, rack: List[Tile]): List[Tile] = {

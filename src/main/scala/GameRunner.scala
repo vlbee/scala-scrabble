@@ -24,7 +24,7 @@ object GameRunner extends App {
   def computerTurn(game: Game): Game = {
 
     val computer = game.computer
-    val (bag, rack) = fillRack(game.bag, computer.rack)
+    val (rack, bag) = fillRack(computer.rack, game.bag)
     displayRack(computer.name, rack)
 
     val word = playWord(rack, level = "longest")
@@ -50,7 +50,7 @@ object GameRunner extends App {
     checkGameOver(game)
 
     val human = game.human
-    val (bag, rack) = fillRack(game.bag, human.rack)
+    val (rack, bag) = fillRack(human.rack, game.bag)
     displayRack(human.name, rack)
 
     val word: String = promptWord()

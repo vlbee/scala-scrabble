@@ -3,23 +3,12 @@ import GameHelpers._
 
 class GameHelpersSpec extends FlatSpec with Matchers {
 
-  "drawTile(bag)" should "return a Tile" in {
-//    var letterBag = Bag.initialise()
-//    drawTile(letterBag) shouldBe an[Option[Tile]] // TODO letterBag var
-  }
-
-  "drawTile(bag)" should "reduce letterBag length by 1" in {
-//    var letterBag = Bag.initialise()
-//    println(letterBag.length)
-//    drawTile(letterBag) // TODO letterBag var
-//    println(letterBag.length)
-//    letterBag.length should equal(100)
-  }
-
   "fillRack(player)" should "return a filled rack of length 7" in {
     val letterBag = Bag.initialise()
-    fillRack(letterBag, Nil) should have length 7
-    fillRack(letterBag, List(Tile('A'))) should have length 7
+    fillRack(Nil, letterBag)._1 should have length 7
+    fillRack(Nil, letterBag)._2 should have length (101 - 7)
+    fillRack(List(Tile('A')), letterBag)._1 should have length 7
+    fillRack(List(Tile('A')), letterBag)._2 should have length (101 - 6)
   }
 
   "removeTilesFromRack(word, rack)" should "retrun rack with leftover tiles" in {
