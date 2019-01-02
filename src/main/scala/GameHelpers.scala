@@ -14,7 +14,6 @@ object GameHelpers {
           tile
         }
         case None => {
-          letterBag = Nil
           None
         }
       }
