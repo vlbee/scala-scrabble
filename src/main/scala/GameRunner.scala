@@ -21,7 +21,7 @@ object GameRunner extends App {
     humanTurn(newGame)
   }
 
-  def computerTurn(game: Game): Game = {
+  def computerTurn(game: Game): Unit = {
 
     val computer = game.computer
     val (rack, bag) = fillRack(computer.rack, game.bag)
@@ -46,7 +46,7 @@ object GameRunner extends App {
     }
   }
 
-  def humanTurn(game: Game): Game = {
+  def humanTurn(game: Game): Unit = {
     checkGameOver(game)
 
     val human = game.human
