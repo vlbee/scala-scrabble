@@ -2,15 +2,30 @@ import GameHelpers.{calculateWordScore}
 
 object GamePrompts {
 
+  def promptName(): String = {
+    println("\u001b[33;1mWhat is your name?")
+    scala.io.StdIn.readLine().toLowerCase.capitalize
+  }
+
+  def promptLevel(): String = {
+    println("\u001b[33;1mHow good are you at Scrabble?\u001b[0m ")
+    println("[1] I'm a pro.")
+    println("[2] Go easy.")
+    println()
+    val level = scala.io.StdIn.readLine().toString
+    level match {
+      case "1" => "hard"
+      case "2" => "easy"
+      case _ => promptLevel()
+    }
+  }
+
   def promptWord(): String = {
     println("\u001b[33;1mPlay a word:\u001b[0m ")
     scala.io.StdIn.readLine().toUpperCase
   }
 
-  def promptName(): String = {
-    println("\u001b[33;1mWhat is your name?")
-    scala.io.StdIn.readLine().toLowerCase.capitalize
-  }
+
 
   def displayScore(player: Player, word: String): Unit = {
     println("\u001b[0mThe word score for " + word + " is " + calculateWordScore(word))

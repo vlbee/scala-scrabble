@@ -12,11 +12,12 @@ object GameRunner extends App {
     println()
     println("Hello " + name + ". \u001b[0mThe Human plays against the Computer.")
     println()
+    val level: String = promptLevel()
 
     val letterBag = Bag.initialise()
     val human = Player(name, Nil, Nil, false)
     val computer = Player("The Computer", Nil, Nil, false)
-    val newGame = Game(letterBag, human, computer)
+    val newGame = Game(letterBag, human, computer, level)
 
     humanTurn(newGame)
   }
@@ -27,7 +28,7 @@ object GameRunner extends App {
     val (rack, bag) = fillRack(computer.rack, game.bag)
     displayRack(computer.name, rack)
 
-    val word = playWord(rack, level = "longest")
+    val word = playWord(rack, game.level)
 
     word match {
       case Some(w) =>
@@ -35,14 +36,14 @@ object GameRunner extends App {
         val playedRack = removeTilesFromRack(w, rack)
         displayScore(computer, w)
         val nextComputer = Player(computer.name, playedRack, computer.wordsPlayed ++ List(w), false)
-        humanTurn(Game(bag, game.human, nextComputer))
+        humanTurn(Game(bag, game.human, nextComputer, game.level))
 
       case None =>
         println("\u001b[36mNo possible words can be played from tiles. Computer forfeits turn.")
         println("\u001b[0m")
         checkGameOver(game)
         val nextComputer = Player(computer.name, Nil, computer.wordsPlayed, flagPlayerGameOver(bag))
-        humanTurn(Game(bag ++ Random.shuffle(rack), game.human, nextComputer))
+        humanTurn(Game(bag ++ Random.shuffle(rack), game.human, nextComputer, game.level))
     }
   }
 
@@ -59,14 +60,14 @@ object GameRunner extends App {
       println("You forfeited but as the letter bag is empty, it's \u001b[33;1mthe end of the game for you.")
       println("\u001b[0m")
       val nextHuman = Player(human.name, Nil, human.wordsPlayed, flagPlayerGameOver(bag))
-      computerTurn(Game(bag, nextHuman, game.computer))
+      computerTurn(Game(bag, nextHuman, game.computer, game.level))
 
     } else if (word == "") {
       print("You have \u001b[36mforfeited your turn ")
       println("\u001b[0min order to draw all new tiles for your next turn.")
       println()
       val nextHuman = Player(human.name, Nil, human.wordsPlayed, flagPlayerGameOver(bag))
-      computerTurn(Game(bag ++ Random.shuffle(rack), nextHuman, game.computer))
+      computerTurn(Game(bag ++ Random.shuffle(rack), nextHuman, game.computer, game.level))
 
     } else if (!isValidWord(word, rack)) {
       print(s"Therefore '$word' is \u001b[36mnot a valid word. ")
@@ -77,7 +78,7 @@ object GameRunner extends App {
       val playedRack = removeTilesFromRack(word, rack)
       displayScore(human, word)
       val nextHuman = Player(human.name, playedRack, human.wordsPlayed ++ List(word), false)
-      computerTurn(Game(bag, nextHuman, game.computer))
+      computerTurn(Game(bag, nextHuman, game.computer, game.level))
     }
   }
 
@@ -91,12 +92,13 @@ object GameRunner extends App {
       println(s"\u001b[0mThe computer's final score: $computerScore")
       println(s"Your final score: $humanScore")
 
+
       if (humanScore == computerScore) {
         print("\u001b[31;1mIt's a TIE. ")
-        println(s"\u001b[33;1mWell done, $name.")
+        println(s"\u001b[33;1mMore practice is needed $name.")
       } else if (humanScore > computerScore) {
         print("\u001b[31;1mYou WIN.")
-        println(s"\u001b[33;1mWell done, $name.")
+        println(s"\u001b[33;1mWell done, $name.")
       } else {
         print("\u001b[31;1mYou LOST to the Computer. ")
         println(s"\u001b[33;1mBetter luck next time, $name.")

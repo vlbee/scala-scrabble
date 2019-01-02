@@ -56,8 +56,8 @@ object GameHelpers {
       None
     } else {
       level match {
-        case "random" => Some(Random.shuffle(possibleWords).head.toUpperCase)
-        case "longest" => Some(possibleWords.sortBy(word => (word.length)).reverse.head.toUpperCase)
+        case "easy" => Some(Random.shuffle(possibleWords).head.toUpperCase)
+        case "hard" => Some(possibleWords.sortBy(word => (word.length)).reverse.head.toUpperCase)
       }
     }
   }
