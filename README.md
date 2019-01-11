@@ -1,6 +1,6 @@
 # scala-scrabble
 
-Exercise to learn Scala.
+Exercise to learn Scala
 
 **Requirements:**
 
