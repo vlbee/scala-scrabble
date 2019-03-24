@@ -1,3 +1,5 @@
+package model
+
 import scala.io.Source
 
 object Dictionary {

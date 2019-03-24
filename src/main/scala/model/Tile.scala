@@ -1,7 +1,9 @@
-case class Tile(c: Char) {
+package model
+
+case class Tile(letter: Char) {
 
   def value: Int = {
-    c match {
+    letter match {
       case 'A' | 'E' | 'I' | 'O' | 'U' | 'N' | 'R' | 'T' | 'L' | 'S' => 1
       case 'G' | 'D' => 2
       case 'B' | 'C' | 'M' | 'P' => 3
@@ -12,7 +14,5 @@ case class Tile(c: Char) {
       case _ => 0
     }
   }
-
-  def letter: Char = c
 
 }

@@ -1,3 +1,4 @@
+import model.Tile
 import org.scalatest._
 
 class TileSpec extends FlatSpec with Matchers {

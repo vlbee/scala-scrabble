@@ -1,7 +1,8 @@
-import scala.util.Random
+package model
 
 object Bag {
 
+  // Maps do not preserve order like Lists
   var letterDistribution: Map[Char, Int] = Map(
     'A' -> 9,
     'B' -> 2,
@@ -32,8 +33,10 @@ object Bag {
   )
 
   def initialise(): List[Tile] = {
-    def dupeLetters(letter: (Char, Int)): List[Tile] = List.fill(letter._2)(Tile(letter._1))
-    Random.shuffle(letterDistribution.toList.flatMap(dupeLetters))
+    letterDistribution.flatMap {
+      case (letter, distribution) => List.fill(distribution)(Tile(letter))
+    }.toList
   }
+
 
 }
