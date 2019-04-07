@@ -9,7 +9,6 @@ sealed trait Player {
 
   def wordsPlayed: List[String]
 
-  def gameOver: Boolean
 
   def calculateWordScore(word: String): Int = {
     word.toList.map(Tile(_).value).sum
@@ -21,9 +20,9 @@ sealed trait Player {
 
 }
 
-final case class Human(name: String, rack: List[Tile] = Nil, wordsPlayed: List[String] = Nil, gameOver: Boolean = false) extends Player
+final case class Human(name: String, rack: List[Tile] = Nil, wordsPlayed: List[String] = Nil) extends Player
 
-final case class Computer(rack: List[Tile] = Nil, wordsPlayed: List[String] = Nil, gameOver: Boolean = false) extends Player {
+final case class Computer(rack: List[Tile] = Nil, wordsPlayed: List[String] = Nil) extends Player {
 
   val name: String = "The Computer"
 
