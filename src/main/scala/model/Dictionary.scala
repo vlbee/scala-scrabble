@@ -7,6 +7,10 @@ object Dictionary {
 
   val all: List[String] = Source.fromFile("src/main/resources/dictionary.txt").getLines.toList
 
+  def isValidWord(word: String, rack: List[Tile]): Boolean = {
+    Dictionary.isInDictionary(word) && Dictionary.isInRack(word, rack)
+  }
+
   def isInDictionary(word: String): Boolean = {
     Dictionary.all.contains(word.toLowerCase())
   }
