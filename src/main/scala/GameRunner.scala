@@ -1,113 +1,109 @@
 import GameHelpers._
 import GamePrompts._
+import model._
+
 import scala.util.Random
 
 object GameRunner extends App {
 
-  def gameStart(): Unit = {
-    println()
-    println("Welcome to \u001b[31;1mScala Scrabble Practice")
-    println()
-    val name: String = promptName()
-    println()
-    println("Hello " + name + ". \u001b[0mThe Human plays against the Computer.")
-    println()
-    val level: String = promptLevel()
+  printWelcome()
+  val name: String = promptName()
+  printGreeting(name)
+  val level: Level = promptLevel()
+  val letterBag = Random.shuffle(Bag.initialise())
+  val newGame = Game.apply(letterBag, Human.apply(name = name), Computer.apply(), level)
+  takeTurn(newGame, newGame.human)
 
-    val letterBag = Bag.initialise()
-    val human = Player(name, Nil, Nil, false)
-    val computer = Player("The Computer", Nil, Nil, false)
-    val newGame = Game(letterBag, human, computer, level)
 
-    humanTurn(newGame)
-  }
+  def takeTurn(game: Game, player: Player): Unit = {
 
-  def computerTurn(game: Game): Unit = {
-    checkGameOver(game)
+    checkIsGameOverAndEnd(game)
 
-    val computer = game.computer
-    val (rack, bag) = fillRack(computer.rack, game.bag)
-    displayRack(computer.name, rack)
+    val (rack, bag) = fillRack(player, game.bag)
 
-    val word = playWord(rack, game.level)
+    if (checkIsPlayerGameOver(game.bag, player)) {
+      printNoPossibleWords()
+      player match {
+        case player: Human =>
+          val gameOverHuman = Human.apply(
+            name = player.name,
+            rack = player.rack,
+            wordsPlayed = game.human.wordsPlayed,
+            gameOver = true
+          )
+          takeTurn(Game.apply(game.bag, gameOverHuman, game.computer, game.level), game.computer)
+
+        case player: Computer =>
+          val gameOverComputer = Computer.apply(
+            rack = player.rack,
+            wordsPlayed = game.computer.wordsPlayed,
+            gameOver = true
+          )
+          takeTurn(Game.apply(game.bag, game.human, gameOverComputer, game.level), game.human)
+      }
+    }
+
+
+
+    val word = player match {
+      case player: Human => promptWord()
+      case player: Computer => player.playWord(rack, game.level)
+    }
 
     word match {
-      case Some(w) =>
-        println(computer.name + s" has played: '$w'")
-        val playedRack = removeTilesFromRack(w, rack)
-        displayScore(computer, w)
-        val nextComputer = Player(computer.name, playedRack, computer.wordsPlayed ++ List(w), false)
-        humanTurn(Game(bag, game.human, nextComputer, game.level))
+      case Some(word) =>
+        val playedRack = removeTilesFromRack(word, rack)
+        printWordPlayed(player.name, word)
 
-      case None =>
-        println("\u001b[36mNo possible words can be played from tiles. Computer forfeits turn.")
-        println("\u001b[0m")
-        checkGameOver(game)
-        val nextComputer = Player(computer.name, Nil, computer.wordsPlayed, flagPlayerGameOver(bag))
-        humanTurn(Game(bag ++ Random.shuffle(rack), game.human, nextComputer, game.level))
-    }
-  }
+        player match {
+          case player: Human =>
+            if (!isValidWord(word, rack)) {
+              invalidWordPlayed(word, rack)
 
-  def humanTurn(game: Game): Unit = {
-    checkGameOver(game)
+              val repeatHuman = Human.apply(
+                name = player.name,
+                rack = rack,
+                wordsPlayed = player.wordsPlayed
+              )
+              takeTurn(Game.apply(bag, repeatHuman, game.computer, game.level), repeatHuman)
 
-    val human = game.human
-    val (rack, bag) = fillRack(human.rack, game.bag)
-    displayRack(human.name, rack)
+            } else {
+              printScore(player, word)
+              val nextHuman = Human.apply(
+                name = player.name,
+                rack = playedRack,
+                wordsPlayed = game.human.wordsPlayed ++ List(word)
+              )
+              takeTurn(Game.apply(bag, nextHuman, game.computer, game.level), game.computer)
+            }
+          case player: Computer =>
+            printScore(player, word)
+            val nextComputer = Computer.apply(
+              rack = playedRack,
+              wordsPlayed = game.computer.wordsPlayed ++ List(word)
+            )
+            takeTurn(Game.apply(bag, game.human, nextComputer, game.level), game.human)
 
-    val word: String = promptWord()
+        }
 
-    if (bag == Nil && word == "") {
-      println("You forfeited but as the letter bag is empty, it's \u001b[33;1mthe end of the game for you.")
-      println("\u001b[0m")
-      val nextHuman = Player(human.name, Nil, human.wordsPlayed, flagPlayerGameOver(bag))
-      computerTurn(Game(bag, nextHuman, game.computer, game.level))
+      case None => player match {
+        case player: Human => printHumanForfeit()
+          val nextHuman = Human.apply(
+            name = player.name,
+            rack = Nil,
+            wordsPlayed = player.wordsPlayed
+          )
+          takeTurn(Game.apply(Random.shuffle(bag ++ Random.shuffle(rack)), nextHuman, game.computer, game.level), game.computer)
 
-    } else if (word == "") {
-      print("You have \u001b[36mforfeited your turn ")
-      println("\u001b[0min order to draw all new tiles for your next turn.")
-      println()
-      val nextHuman = Player(human.name, Nil, human.wordsPlayed, flagPlayerGameOver(bag))
-      computerTurn(Game(bag ++ Random.shuffle(rack), nextHuman, game.computer, game.level))
-
-    } else if (!isValidWord(word, rack)) {
-      print(s"Therefore '$word' is \u001b[36mnot a valid word. ")
-      println("\u001b[33;1mTry again.\u001b[0m")
-      humanTurn(game)
-
-    } else {
-      val playedRack = removeTilesFromRack(word, rack)
-      displayScore(human, word)
-      val nextHuman = Player(human.name, playedRack, human.wordsPlayed ++ List(word), false)
-      computerTurn(Game(bag, nextHuman, game.computer, game.level))
-    }
-  }
-
-  def checkGameOver(game: Game): Unit = {
-    val name = game.human.name
-    val computerScore: Int = (game.computer.wordsPlayed).map(calculateWordScore(_)).sum
-    val humanScore: Int = (game.human.wordsPlayed).map(calculateWordScore(_)).sum
-
-    if (game.bag == Nil && (game.human.gameOver || game.computer.gameOver)) {
-      println("\u001b[31;1mIt's GAME OVER.")
-      println(s"\u001b[0mThe computer's final score: $computerScore")
-      println(s"Your final score: $humanScore")
-
-
-      if (humanScore == computerScore) {
-        print("\u001b[31;1mIt's a TIE. ")
-        println(s"\u001b[33;1mMore practice is needed $name.")
-      } else if (humanScore > computerScore) {
-        print("\u001b[31;1mYou WIN. ")
-        println(s"\u001b[33;1mWell done, $name.")
-      } else {
-        print("\u001b[31;1mYou LOST to the Computer. ")
-        println(s"\u001b[33;1mBetter luck next time, $name.")
+        case player: Computer => printComputerForfeit()
+          val nextComputer = Computer.apply(
+            rack = Nil,
+            wordsPlayed = player.wordsPlayed
+          )
+          takeTurn(Game.apply(
+            bag ++ Random.shuffle(rack), game.human, nextComputer, game.level), game.human)
       }
-      sys.exit()
     }
   }
-
-  gameStart()
-
 }
+

@@ -1,16 +1,38 @@
-import scala.util.Random
+import GamePrompts._
+import model._
 
 object GameHelpers {
 
-  def fillRack(rack: List[Tile], letterBag: List[Tile]): (List[Tile], List[Tile]) = {
-    val (drawnTiles, newBag) = letterBag.splitAt(7 - rack.length)
-    val filledRack = rack ++ drawnTiles
+  def checkIsPlayerGameOver(bag: List[Tile], player: Player): Boolean = {
+    if (bag.isEmpty) {
+      Dictionary.filterPossibleWords(player.rack) match {
+        case Some(l) => false
+        case None => player match {
+          case player: Human => true
+          case player: Computer => true
+        }
+      }
+    } else false
+  }
+
+  def checkIsGameOverAndEnd(game: Game): Unit = {
+    if (game.bag.isEmpty && (game.human.gameOver || game.computer.gameOver)) {
+      val computerScore: Int = (game.computer.totalScore())
+      val humanScore: Int = (game.human.totalScore())
+
+      printGameOverSummary(computerScore, humanScore, game.human.name, game.computer.name)
+      sys.exit()
+    }
+  }
+
+  def fillRack(player: Player, letterBag: List[Tile]): (List[Tile], List[Tile]) = {
+    val (drawnTiles, newBag) = letterBag.splitAt(7 - player.rack.length)
+    val filledRack = player.rack ++ drawnTiles
+
+    printRack(player.name, filledRack)
 
     if (filledRack.length < 7) {
-      println("\u001b[0m---------")
-      print("\u001b[31;1mWARNING: ")
-      println("\u001b[36mThe letter bag is empty.")
-      print("\u001b[0m")
+      printBagIsEmptyWarning()
     }
 
     (filledRack, newBag)
@@ -21,49 +43,19 @@ object GameHelpers {
     rack diff wordTiles
   }
 
-  def calculateWordScore(word: String): Int = {
-    word.toList.map(Tile(_).value).sum
-  }
-
-  def isInDictionary(word: String): Boolean = {
-    if (Dictionary.all.contains(word.toLowerCase())) true else false
-  }
-
-  def isInRack(word: String, rack: List[Tile]): Boolean = {
-    val sortedWord = word.toList.sortWith(_.compareTo(_) < 0)
-    val sortedRack = rack.map(_.letter).sortWith(_.compareTo(_) < 0)
-
-    def loop(wL: List[Char], wI: Int, rL: List[Char], rI: Int): Boolean = {
-      if (wI == sortedWord.length) true
-      else if (rI == sortedRack.length) false
-      else if (wL(wI) == rL(rI)) loop(wL, wI + 1, rL, rI + 1)
-      else if (wL(wI) != rL(rI)) loop(wL, wI, rL, rI + 1)
-      else false
-    }
-
-    loop(sortedWord, 0, sortedRack, 0)
-  }
 
   def isValidWord(word: String, rack: List[Tile]): Boolean = {
-    if(!isInDictionary(word)) { println(s"'$word' is not in the Scrabble Dictionary.")}
-    if(!isInRack(word, rack)) { println("You don't have those letter tiles in your rack.")}
-    isInDictionary(word) && isInRack(word, rack)
+    Dictionary.isInDictionary(word) && Dictionary.isInRack(word, rack)
   }
 
-  def playWord(rack: List[Tile], level: String): Option[String] = {
-    val possibleWords = Dictionary.all.filter(word => isInRack(word.toUpperCase, rack))
-    if (possibleWords == Nil) {
-      None
-    } else {
-      level match {
-        case "easy" => Some(Random.shuffle(possibleWords).head.toUpperCase)
-        case "hard" => Some(possibleWords.sortBy(word => (word.length)).reverse.head.toUpperCase)
+  def invalidWordPlayed(word: String, rack: List[Tile]): Unit = {
+      if (!Dictionary.isInDictionary(word)) {
+        printInvalidWordReason(word, NotInDictionary)
       }
-    }
-  }
-
-  def flagPlayerGameOver(bag: List[Tile]): Boolean = {
-    if (bag == Nil) true else false
+      if (!Dictionary.isInRack(word, rack)) {
+        printInvalidWordReason(word, TilesNotInRack)
+      }
+      printTryAgain(word)
   }
 
 }
