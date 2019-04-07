@@ -52,8 +52,10 @@ object GamePrompts {
     notifyUser("WARNING: the letter bag is empty", blue)
   }
 
-  def printNoPossibleWords(): Unit = {
-    notifyUser("There are no valid Scrabble words possible from these tiles.", blue)
+  def printNoPossibleWords(humanName: String, humanRack: List[Tile], computerName: String, computerRack: List[Tile]): Unit = {
+    printRemainingTiles(humanName, humanRack)
+    printRemainingTiles(computerName, computerRack)
+    notifyUser("Neither player has any valid Scrabble words possible from their tiles.", blue)
   }
 
   def printWordPlayed(name: String, word: String): Unit = {
@@ -63,6 +65,12 @@ object GamePrompts {
   def printScore(player: Player, word: String): Unit = {
     notifyUser(s"The word score for $word is ${player.calculateWordScore(word)}", white)
     notifyUser(s"${player.name}'s total score is ${(player.wordsPlayed ++ List(word)).map(player.calculateWordScore(_)).sum}\n", red)
+  }
+
+  def printRemainingTiles(name: String, rack: List[Tile]): Unit = {
+    val tiles = rack.map(tile => tile.letter).mkString(" ")
+    if (tiles.length == 0) notifyUser(s"$name has no remaining tiles.", white) else
+      notifyUser(s"$name's remaining tiles are: $tiles", white)
   }
 
   def printRack(name: String, rack: List[Tile]): Unit = {
@@ -100,21 +108,30 @@ object GamePrompts {
     notifyUser("Try again", yellow)
   }
 
-  def printGameOverSummary(computerScore: Int, humanScore: Int, name: String, computer: String): Unit = {
+  def printPlayedWords(words: List[String]): Unit = {
+
+  }
+
+  def printGameOverSummary(computer: Computer, human: Human): Unit = {
     notifyUser("\nIt's GAME OVER", red)
-    notifyUser(s"The computer's final score is $computerScore", white)
-    notifyUser(s"Your final score is $humanScore", white)
-    val result = computerScore - humanScore
+
+    notifyUser(s"${computer.name} played: ${computer.wordsPlayed.mkString(", ")}", white)
+    notifyUser(s"${human.name} played: ${human.wordsPlayed.mkString(", ")}", white)
+
+    notifyUser(s"${computer.name}'s final score is ${computer.totalScore()}", white)
+    notifyUser(s"${human.name}'s final score is ${human.totalScore()}", white)
+
+    val result = computer.totalScore() - human.totalScore()
     result match {
       case 0 =>
         notifyUser("It's a TIE.", yellow)
-        notifyUser(s"More practice is needed $name.", yellow)
+        notifyUser(s"More practice is needed ${human.name}.", yellow)
       case result if result > 0 =>
         notifyUser("You LOST to the Computer.", yellow)
-        notifyUser(s"Better luck next time, $name.", yellow)
+        notifyUser(s"Better luck next time, ${human.name}.", yellow)
       case result if result < 0 =>
         notifyUser("You WIN.", yellow)
-        notifyUser(s"Well done $name.", yellow)
+        notifyUser(s"Well done ${human.name}.", yellow)
     }
   }
 }
