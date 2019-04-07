@@ -2,7 +2,7 @@ package model
 
 object Bag {
 
-  // Maps do not preserve order like Lists
+  // Maps do not preserve order like Lists - maps are stored as a tree data structure
   var letterDistribution: Map[Char, Int] = Map(
     'A' -> 9,
     'B' -> 2,
@@ -37,6 +37,5 @@ object Bag {
       case (letter, distribution) => List.fill(distribution)(Tile(letter))
     }.toList
   }
-
 
 }
