@@ -1,5 +1,6 @@
 import org.scalatest._
 import GameHelpers._
+import model.{Bag, Tile}
 
 class GameHelpersSpec extends FlatSpec with Matchers {
 
